@@ -1,3 +1,3 @@
 #!/bin/bash
- make && ./out.bin
+ make clean && make && ./out.bin ./file/
 
