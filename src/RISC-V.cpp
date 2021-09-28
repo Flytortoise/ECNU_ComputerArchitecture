@@ -34,11 +34,11 @@ Your job is to implement the implement the ReadWrite() member function that prov
 class RF
 {
 public:
-    bitset<32> ReadData1, ReadData2;
+    bitset<64> ReadData1, ReadData2;        // change 32 -> 64 by ZhangJunTao
     RF(const string &outFileName) : m_outFileName(outFileName)
     {
         Registers.resize(32);
-        Registers[0] = bitset<32>(0);
+        Registers[0] = bitset<64>(0);
     }
 
     void ReadWrite(bitset<RISC_V_REG_SIZE> RdReg1, bitset<RISC_V_REG_SIZE> RdReg2, bitset<RISC_V_REG_SIZE> WrtReg, bitset<32> WrtData, bitset<1> WrtEnable)
@@ -67,7 +67,7 @@ public:
 
     }
 private:
-    vector<bitset<32> >Registers;
+    vector<bitset<64> >Registers;
     string m_outFileName;
 };
 
@@ -79,8 +79,8 @@ private:
 class ALU
 {
 public:
-    bitset<32> ALUresult;
-    bitset<32> ALUOperation(bitset<3> ALUOP, bitset<32> oprand1, bitset<32> oprand2)
+    bitset<64> ALUresult;
+    bitset<64> ALUOperation(bitset<3> ALUOP, bitset<64> oprand1, bitset<64> oprand2)
     {
         // TODO: implement!
         return ALUresult;       // TODO this is tmp by zhangyan 20210925
@@ -208,6 +208,7 @@ private:
 };
 
 // this function need to be QA by zhangyan 20210925
+// I-Type in <RISC-V Instruction Set Manual-Volume 1>, page 130 -- 135
 bitset<1> isITypeFunc(const string& str) {
     /*
     isIType = instruction.to_string().substr(0, 5) != string("00000") &&
