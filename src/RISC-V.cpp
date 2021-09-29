@@ -34,18 +34,16 @@ Your job is to implement the implement the ReadWrite() member function that prov
 class RF
 {
 public:
-    bitset<32> ReadData1, ReadData2;
+    bitset<64> ReadData1, ReadData2;
     RF(const string &outFileName) : m_outFileName(outFileName)
     {
         Registers.resize(32);
-        Registers[0] = bitset<32>(0);
+        Registers[0] = bitset<64>(0);
     }
 
-    void ReadWrite(bitset<RISC_V_REG_SIZE> RdReg1, bitset<RISC_V_REG_SIZE> RdReg2, bitset<RISC_V_REG_SIZE> WrtReg, bitset<32> WrtData, bitset<1> WrtEnable)
+    void ReadWrite(bitset<RISC_V_REG_SIZE> RdReg1, bitset<RISC_V_REG_SIZE> RdReg2, bitset<RISC_V_REG_SIZE> WrtReg, bitset<64> WrtData, bitset<1> WrtEnable)
     {
-        // TODO: implement!
-        
-
+        // TODO: implement! 
     }
 
     void OutputRF()
@@ -67,7 +65,7 @@ public:
 
     }
 private:
-    vector<bitset<32> >Registers;
+    vector<bitset<64> >Registers;
     string m_outFileName;
 };
 
@@ -79,8 +77,8 @@ private:
 class ALU
 {
 public:
-    bitset<32> ALUresult;
-    bitset<32> ALUOperation(bitset<3> ALUOP, bitset<32> oprand1, bitset<32> oprand2)
+    bitset<64> ALUresult;
+    bitset<64> ALUOperation(bitset<3> ALUOP, bitset<64> oprand1, bitset<64> oprand2)
     {
         // TODO: implement!
         return ALUresult;       // TODO this is tmp by zhangyan 20210925
@@ -156,7 +154,7 @@ and an access to data memory class returns 8 bytes of data.
 class DataMem
 {
 public:
-    bitset<32> readdata;
+    bitset<64> readdata;
     DataMem(const string &inFileName, const string &outFileName) : m_inFileName(inFileName), m_outFileName(outFileName)
     {
         DMem.resize(MemSize);
@@ -177,10 +175,10 @@ public:
         dmem.close();
 
     }
-    bitset<32> MemoryAccess(bitset<32> Address, bitset<32> WriteData, bitset<1> readmem, bitset<1> writemem)
+    bitset<32> MemoryAccess(bitset<64> Address, bitset<64> WriteData, bitset<1> readmem, bitset<1> writemem)
     {
         // TODO: implement!
-        return Address;       // TODO this is tmp by zhangyan 20210925
+        return bitset<32>(0);
     }
 
     void OutputDataMem()
@@ -207,13 +205,7 @@ private:
     string m_outFileName;
 };
 
-// this function need to be QA by zhangyan 20210925
 bitset<1> isITypeFunc(const string& str) {
-    /*
-    isIType = instruction.to_string().substr(0, 5) != string("00000") &&
-            instruction.to_string().substr(0, 4) != string("0001");
-    */
-
     bitset<1> result = (str.substr(0, RISC_V_OP_SIZE) == string("1100111") ||
                         str.substr(0, RISC_V_OP_SIZE) == string("0000011") ||
                         str.substr(0, RISC_V_OP_SIZE) == string("0010011") ||
@@ -257,42 +249,32 @@ int main(int argc, char *argv[])
         // 1. Fetch Instruction
         bitset<32> instruction = myInsMem.ReadMemory(PC);
         cout << "Instruction is [" << instruction.to_string() << "]" << endl;
-        // If current insturciton is "11111111111111111111111111111111", then break;
         if (myInsMem.Instruction.to_ulong() == 0xffffffff) {
             cout << "this is 'Halt instruction', save data mem to dmemresult.txt and exit simulator" << endl;
             break;
         }
         // decode(Read RF)
         // Decoder
-        isLoad = instruction.to_string().substr(0, RISC_V_OP_SIZE) == string("0000011");      // 100011 -> 0000011(RISC-V load)
-        isStore = instruction.to_string().substr(0, RISC_V_OP_SIZE) == string("0100011");      // 101011 -> 0100011(RISC-V store)
-        isJType = instruction.to_string().substr(0, RISC_V_OP_SIZE) == string("1101111");      // 000010 -> 1101111(RISC-V jal)
-        isBranch = instruction.to_string().substr(0, RISC_V_OP_SIZE) == string("1100011");      // 000100 -> 1100011(RISC-V beq)
+        isLoad = instruction.to_string().substr(0, RISC_V_OP_SIZE) == string("0000011");
+        isStore = instruction.to_string().substr(0, RISC_V_OP_SIZE) == string("0100011");
+        isJType = instruction.to_string().substr(0, RISC_V_OP_SIZE) == string("1101111"); 
+        isBranch = instruction.to_string().substr(0, RISC_V_OP_SIZE) == string("1100011");   
         isIType = isITypeFunc(instruction.to_string());         // I-Type in <RISC-V Instruction Set Manual-Volume 1>, page 130 -- 135
         wrtEnable = !(isStore.to_ulong() || isBranch.to_ulong() || isJType.to_ulong());
         aluOp = bitset<3>(instruction.to_string().substr(12, 3));        // funct3? this need to be QA by zhangyan 20210925
-        // if (instruction.to_string().substr(0, RISC_V_OP_SIZE) == string("0000011") ||       // Load
-        //     instruction.to_string().substr(0, RISC_V_OP_SIZE) == string("0100011")) {       // Store
-        //     aluOp = bitset<3>("011");       // 001 -> 011 (LD or SD)
-        // }
-        // else if (instruction.to_string().substr(0, RISC_V_OP_SIZE) == string("0000000")) {
-        //     aluOp = bitset<3>(instruction.to_string().substr(29, 3));
-        // }
-        // else {
-        //     aluOp = bitset<3>(instruction.to_string().substr(12, 3));
-        // }
-
+       
+        bitset<5> rs1 = bitset<5>(instruction.to_string().substr(15, RISC_V_REG_SIZE));
+        // if Type is I-Type, no reg2 in Instruction, so set reg2 Zero
+        bitset<5> rs2 = isIType[0] ? bitset<5>(0) : bitset<5>(instruction.to_string().substr(20, RISC_V_REG_SIZE));
+        bitset<5> rd = bitset<5>(instruction.to_string().substr(7, RISC_V_REG_SIZE));
+        
         // 2. Register File Instruction
-        myRF.ReadWrite(bitset<5>(instruction.to_string().substr(15, RISC_V_REG_SIZE)), 
-                        isIType[0] ? bitset<5>(0) : bitset<5>(instruction.to_string().substr(20, RISC_V_REG_SIZE)),
-                        bitset<5>(instruction.to_string().substr(7, RISC_V_REG_SIZE)),
-                        bitset<32>(0), wrtEnable);
-                    // if Type is I-Type, no reg2 in Instruction,so set reg2 Zero
+        myRF.ReadWrite(rs1, rs2, rd, bitset<64>(0), wrtEnable); 
 
         // 3. Execuete alu operation        TODO this need to by QA by zhangyan 20210925
-        bitset<32> tmp(string(23, '0') + instruction.to_string().substr(25, 5) + instruction.to_string().substr(8, 5)); // if positive, 0 padded
+        bitset<64> tmp(string(23, '0') + instruction.to_string().substr(25, 5) + instruction.to_string().substr(8, 5)); // if positive, 0 padded
         if (tmp[RISC_V_OP_SIZE] == true) {      // -
-            tmp = bitset<32>(string(23, '1') + instruction.to_string().substr(25, 5) + instruction.to_string().substr(8, 5));
+            tmp = bitset<64>(string(23, '1') + instruction.to_string().substr(25, 5) + instruction.to_string().substr(8, 5));
         }
         myALU.ALUOperation(aluOp, myRF.ReadData1, isIType[0] ? tmp : myRF.ReadData2);
 
@@ -301,14 +283,7 @@ int main(int argc, char *argv[])
         myDataMem.MemoryAccess(myALU.ALUresult, myRF.ReadData2, isLoad, isStore);
 
         // 5. Register File Update(Write Back)
-        myRF.ReadWrite(bitset<5>(instruction.to_string().substr(15, RISC_V_REG_SIZE)), 
-                isIType[0] ? bitset<5>(0) : bitset<5>(instruction.to_string().substr(20, RISC_V_REG_SIZE)),
-                bitset<5>(instruction.to_string().substr(7, RISC_V_REG_SIZE)),
-                isLoad[0] ? myDataMem.readdata : myALU.ALUresult, wrtEnable);
-                    // if Type is I-Type, no reg2 in Instruction,so set reg2 Zero
-        // myRF.ReadWrite(bitset<5>(instruction.to_string().substr(6, 5)), bitset<5>(instruction.to_string().substr(11, 5)),
-        //     isIType[0] ? bitset<5>(instruction.to_string().substr(11, 5)) : bitset<5>(instruction.to_string().substr(16, 5)),
-        //     isLoad[0] ? myDataMem.readdata : myALU.ALUresult, wrtEnable);
+        myRF.ReadWrite(rs1, rs2, rd, isLoad[0] ? myDataMem.readdata : myALU.ALUresult, wrtEnable);
 
         // Update PC
         if (isBranch[0] && myRF.ReadData1 == myRF.ReadData2) {      // beq need to be QA by zhangyan 20210925
