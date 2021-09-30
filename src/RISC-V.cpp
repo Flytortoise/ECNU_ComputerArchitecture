@@ -255,10 +255,10 @@ int main(int argc, char *argv[])
         }
         // decode(Read RF)
         // Decoder
-        isLoad = instruction.to_string().substr(0, RISC_V_OP_SIZE) == string("0000011");
-        isStore = instruction.to_string().substr(0, RISC_V_OP_SIZE) == string("0100011");
-        isJType = instruction.to_string().substr(0, RISC_V_OP_SIZE) == string("1101111"); 
-        isBranch = instruction.to_string().substr(0, RISC_V_OP_SIZE) == string("1100011");   
+        isLoad = instruction.to_string().substr(0, RISC_V_OP_SIZE) == string("0000011");      // 100011 -> 0000011(RISC-V load)
+        isStore = instruction.to_string().substr(0, RISC_V_OP_SIZE) == string("0100011");     // 101011 -> 0100011(RISC-V store)
+        isJType = instruction.to_string().substr(0, RISC_V_OP_SIZE) == string("1101111");     // 000010 -> 1101111(RISC-V jal)
+        isBranch = instruction.to_string().substr(0, RISC_V_OP_SIZE) == string("1100011");    // 000100 -> 1100011(RISC-V beq)
         isIType = isITypeFunc(instruction.to_string());         // I-Type in <RISC-V Instruction Set Manual-Volume 1>, page 130 -- 135
         wrtEnable = !(isStore.to_ulong() || isBranch.to_ulong() || isJType.to_ulong());
         aluOp = bitset<3>(instruction.to_string().substr(12, 3));        // funct3? this need to be QA by zhangyan 20210925
