@@ -1,0 +1,5 @@
+.vscode
+*.dsYM
+*.out
+*.bin
+.idea/
