@@ -282,9 +282,11 @@ int main(int argc, char *argv[])
         myRF.ReadWrite(rs1, rs2, rd, bitset<64>(0), wrtEnable); 
 
         // 3. Execuete alu operation        TODO this need to by QA by zhangyan 20210925
-        bitset<64> tmp(string(23, '0') + instruction.to_string().substr(25, 5) + instruction.to_string().substr(8, 5)); // if positive, 0 padded
+        bitset<64> tmp(string(19, '0') + instruction.to_string().substr(31, 1) + instruction.to_string().substr(7, 1) +
+                                         instruction.to_string().substr(25, 6) +instruction.to_string().substr(8, 4) + string("0")); // if positive, 0 padded
         if (tmp[RISC_V_OP_SIZE] == true) {      // -
-            tmp = bitset<64>(string(23, '1') + instruction.to_string().substr(25, 5) + instruction.to_string().substr(8, 5));
+            tmp = bitset<64>(string(19, '1') + instruction.to_string().substr(31, 1) + instruction.to_string().substr(7, 1) +
+                                        instruction.to_string().substr(25, 6) +instruction.to_string().substr(8, 4) + string("0"));
         }
         myALU.ALUOperation(aluOp, myRF.ReadData1, isIType[0] ? tmp : myRF.ReadData2);
 
