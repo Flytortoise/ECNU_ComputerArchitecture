@@ -286,23 +286,48 @@ int main(int argc, char *argv[])
         myRF.ReadWrite(rs1, rs2, rd, isLoad[0] ? myDataMem.readdata : myALU.ALUresult, wrtEnable);
 
         // Update PC
-        if (isBranch[0] && myRF.ReadData1 == myRF.ReadData2) {      // beq need to be QA by zhangyan 20210925
-            bitset<32> addressExtend;
-            if (instruction[RISC_V_OP_SIZE] == true) {      // -
-                addressExtend = bitset<32>(string(23, '1') + instruction.to_string().substr(25, 5) + instruction.to_string().substr(8, 5));
-            }
-            else {                                          // +
-                addressExtend = bitset<32>(string(23, '0') + instruction.to_string().substr(25, 5) + instruction.to_string().substr(8, 5));
-            }
-            PC = bitset<32>(PC.to_ulong() + 4 + addressExtend.to_ulong());
-        }
-        else if (isJType[0]) {      // JAL   imm[20|10:1|11|19:12], this need to be QA by zhangyan 20210925
-            PC = bitset<32>(string(RISC_V_OP_SIZE, '0') + instruction.to_string().substr(RISC_V_OP_SIZE, 25));
-        }
-        else {
-            PC = bitset<32>(PC.to_ulong() + 4);
-        }
+//         if (isBranch[0] && myRF.ReadData1 == myRF.ReadData2) {      // beq need to be QA by zhangyan 20210925
+//             bitset<32> addressExtend;
+//             if (instruction[RISC_V_OP_SIZE] == true) {      // -
+//                 addressExtend = bitset<32>(string(23, '1') + instruction.to_string().substr(25, 5) + instruction.to_string().substr(8, 5));
+//             }
+//             else {                                          // +
+//                 addressExtend = bitset<32>(string(23, '0') + instruction.to_string().substr(25, 5) + instruction.to_string().substr(8, 5));
+//             }
+//             PC = bitset<32>(PC.to_ulong() + 4 + addressExtend.to_ulong());
+//         }
+//         else if (isJType[0]) {      // JAL   imm[20|10:1|11|19:12], this need to be QA by zhangyan 20210925
+//             PC = bitset<32>(string(RISC_V_OP_SIZE, '0') + instruction.to_string().substr(RISC_V_OP_SIZE, 25));
+//         }
+//         else {
+//             PC = bitset<32>(PC.to_ulong() + 4);
+//         }
 
+        if (isBranch[0] && myRF.ReadData1 == myRF.ReadData2) {     
+            bitset<32> addressExtend;
+            if (instruction[RISC_V_OP_SIZE] == true) {      // 负数
+                addressExtend = bitset<32>(string(19, '1') + instruction.to_string().substr(9, 4) + instruction.to_string().substr(26, 6) + 
+                                instruction.to_string().substr(8, 1) + instruction.to_string().substr(32, 1) + string("0"));
+               }
+           
+            else {                                          // 正数
+                addressExtend = bitset<32>(string(19, '0') + instruction.to_string().substr(9, 4) + instruction.to_string().substr(26, 6) + 
+                                instruction.to_string().substr(8, 1) + instruction.to_string().substr(32, 1) + string("0"));
+             }
+             PC = bitset<32>(PC.to_ulong() + addressExtend.to_ulong());
+         }
+
+          
+        else if (isJType[0]) {   
+            bitset<32> addressExtend2;
+            
+            addressExtend2 = bitset<32>(string(11, '0') + instruction.to_string().substr(22, 10) + instruction.to_string().substr(21, 1) +
+                                instruction.to_string().substr(12, 8) + instruction.to_string().substr(32, 1) + string("0"));               
+            PC = bitset<32>(PC.to_ulong() + 4 + addressExtend.to_ulong());
+        else {
+             PC = bitset<32>(PC.to_ulong() + 4 );
+        
+        
         myRF.OutputRF(); // dump RF;    
     }
     myDataMem.OutputDataMem(); // dump data mem
