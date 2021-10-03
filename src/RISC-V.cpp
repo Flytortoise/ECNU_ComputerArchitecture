@@ -282,11 +282,9 @@ int main(int argc, char *argv[])
         myRF.ReadWrite(rs1, rs2, rd, bitset<64>(0), wrtEnable); 
 
         // 3. Execuete alu operation        TODO this need to by QA by zhangyan 20210925
-        bitset<64> tmp(string(19, '0') + instruction.to_string().substr(31, 1) + instruction.to_string().substr(7, 1) +
-                                         instruction.to_string().substr(25, 6) +instruction.to_string().substr(8, 4) + string("0")); // if positive, 0 padded
-        if (tmp[RISC_V_OP_SIZE] == true) {      // -
-            tmp = bitset<64>(string(19, '1') + instruction.to_string().substr(31, 1) + instruction.to_string().substr(7, 1) +
-                                        instruction.to_string().substr(25, 6) +instruction.to_string().substr(8, 4) + string("0"));
+        bitset<64> tmp(instruction.to_string().substr(20, 12)); // if positive, 0 padded
+        if (instruction[31] == true) {      // -  TBD
+            tmp = bitset<64>(string(52, '1') + instruction.to_string().substr(20, 12));
         }
         myALU.ALUOperation(aluOp, myRF.ReadData1, isIType[0] ? tmp : myRF.ReadData2);
 
@@ -300,7 +298,7 @@ int main(int argc, char *argv[])
         // Update PC
         if (isBranch[0] && myRF.ReadData1 == myRF.ReadData2) {  // beq
             bitset<32> addressExtend;
-            if (instruction[RISC_V_OP_SIZE] == true) {      // 负数
+            if (instruction[31] == true) {      // 负数
                 addressExtend = bitset<32>(string(19, '1') + instruction.to_string().substr(31, 1) + instruction.to_string().substr(7, 1) +
                                         instruction.to_string().substr(25, 6) +instruction.to_string().substr(8, 4) + string("0"));
                }
@@ -324,7 +322,7 @@ int main(int argc, char *argv[])
         
         myRF.OutputRF(); // dump RF;    
     }
-    myDataMem.OutputDataMem(); // dump data mem
+    myDataMem.OutputDataMem(); // dump data memX
 
     return 0;
 }
