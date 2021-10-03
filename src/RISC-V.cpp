@@ -26,6 +26,16 @@ using namespace std;
 // we keep it as this large number, but the memory is still 32-bit addressable.
 #define MemSize 65536
 
+bitset<32> ConvertEndian(const bitset<32> in_data) {
+    string result;
+    string tmp_data = in_data.to_string();
+
+    for (int i = 0; i < 4; i++) {
+        result += tmp_data.substr(i*8, 8);
+    }
+    return bitset<32>(result);
+}
+
 /*
 contains 32 64-bit registers defined as a private member. 
 Remember that register $0 is always 0. 
@@ -272,9 +282,11 @@ int main(int argc, char *argv[])
         myRF.ReadWrite(rs1, rs2, rd, bitset<64>(0), wrtEnable); 
 
         // 3. Execuete alu operation        TODO this need to by QA by zhangyan 20210925
-        bitset<64> tmp(string(23, '0') + instruction.to_string().substr(25, 5) + instruction.to_string().substr(8, 5)); // if positive, 0 padded
+        bitset<64> tmp(string(19, '0') + instruction.to_string().substr(31, 1) + instruction.to_string().substr(7, 1) +
+                                         instruction.to_string().substr(25, 6) +instruction.to_string().substr(8, 4) + string("0")); // if positive, 0 padded
         if (tmp[RISC_V_OP_SIZE] == true) {      // -
-            tmp = bitset<64>(string(23, '1') + instruction.to_string().substr(25, 5) + instruction.to_string().substr(8, 5));
+            tmp = bitset<64>(string(19, '1') + instruction.to_string().substr(31, 1) + instruction.to_string().substr(7, 1) +
+                                        instruction.to_string().substr(25, 6) +instruction.to_string().substr(8, 4) + string("0"));
         }
         myALU.ALUOperation(aluOp, myRF.ReadData1, isIType[0] ? tmp : myRF.ReadData2);
 
@@ -286,24 +298,7 @@ int main(int argc, char *argv[])
         myRF.ReadWrite(rs1, rs2, rd, isLoad[0] ? myDataMem.readdata : myALU.ALUresult, wrtEnable);
 
         // Update PC
-//         if (isBranch[0] && myRF.ReadData1 == myRF.ReadData2) {      // beq need to be QA by zhangyan 20210925
-//             bitset<32> addressExtend;
-//             if (instruction[RISC_V_OP_SIZE] == true) {      // -
-//                 addressExtend = bitset<32>(string(23, '1') + instruction.to_string().substr(25, 5) + instruction.to_string().substr(8, 5));
-//             }
-//             else {                                          // +
-//                 addressExtend = bitset<32>(string(23, '0') + instruction.to_string().substr(25, 5) + instruction.to_string().substr(8, 5));
-//             }
-//             PC = bitset<32>(PC.to_ulong() + 4 + addressExtend.to_ulong());
-//         }
-//         else if (isJType[0]) {      // JAL   imm[20|10:1|11|19:12], this need to be QA by zhangyan 20210925
-//             PC = bitset<32>(string(RISC_V_OP_SIZE, '0') + instruction.to_string().substr(RISC_V_OP_SIZE, 25));
-//         }
-//         else {
-//             PC = bitset<32>(PC.to_ulong() + 4);
-//         }
-
-        if (isBranch[0] && myRF.ReadData1 == myRF.ReadData2) {     
+        if (isBranch[0] && myRF.ReadData1 == myRF.ReadData2) {  // beq
             bitset<32> addressExtend;
             if (instruction[RISC_V_OP_SIZE] == true) {      // 负数
                 addressExtend = bitset<32>(string(19, '1') + instruction.to_string().substr(31, 1) + instruction.to_string().substr(7, 1) +
@@ -313,21 +308,19 @@ int main(int argc, char *argv[])
             else {                                          // 正数
                 addressExtend = bitset<32>(string(19, '0') + instruction.to_string().substr(31, 1) + instruction.to_string().substr(7, 1) +
                                          instruction.to_string().substr(25, 6) +instruction.to_string().substr(8, 4) + string("0"));
-             }
-             PC = bitset<32>(PC.to_ulong() + addressExtend.to_ulong());
+            }
+            PC = bitset<32>(PC.to_ulong() + addressExtend.to_ulong());
         }
-        else if (isJType[0]) {
+        else if (isJType[0]) {          // JAL   imm[20|10:1|11|19:12]
             bitset<32> addressExtend2;
             
             addressExtend2 = bitset<32>(string(11, '0') + instruction.to_string().substr(31, 1) + instruction.to_string().substr(12, 8)  +
-                                        instruction.to_string().substr(20, 1)+  instruction.to_string().substr(21, 10)+string("0"));             
+                                        instruction.to_string().substr(20, 1)+  instruction.to_string().substr(21, 10)+string("0"));
             PC = bitset<32>(PC.to_ulong() + 4 + addressExtend2.to_ulong());
         }
         else {
-             PC = bitset<32>(PC.to_ulong() + 4 );
+            PC = bitset<32>(PC.to_ulong() + 4);
         }
-        
-        
         
         myRF.OutputRF(); // dump RF;    
     }
