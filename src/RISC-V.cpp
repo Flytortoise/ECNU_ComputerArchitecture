@@ -315,18 +315,17 @@ int main(int argc, char *argv[])
                                 instruction.to_string().substr(8, 1) + instruction.to_string().substr(32, 1) + string("0"));
              }
              PC = bitset<32>(PC.to_ulong() + addressExtend.to_ulong());
-         }
-
-          
-        else if (isJType[0]) {   
+        }
+        else if (isJType[0]) {
             bitset<32> addressExtend2;
             
             addressExtend2 = bitset<32>(string(11, '0') + instruction.to_string().substr(22, 10) + instruction.to_string().substr(21, 1) +
                                 instruction.to_string().substr(12, 8) + instruction.to_string().substr(32, 1) + string("0"));               
-            PC = bitset<32>(PC.to_ulong() + 4 + addressExtend.to_ulong());
+            PC = bitset<32>(PC.to_ulong() + 4 + addressExtend2.to_ulong());
+        }
         else {
              PC = bitset<32>(PC.to_ulong() + 4 );
-        
+        }
         
         myRF.OutputRF(); // dump RF;    
     }
