@@ -306,26 +306,28 @@ int main(int argc, char *argv[])
         if (isBranch[0] && myRF.ReadData1 == myRF.ReadData2) {     
             bitset<32> addressExtend;
             if (instruction[RISC_V_OP_SIZE] == true) {      // 负数
-                addressExtend = bitset<32>(string(19, '1') + instruction.to_string().substr(9, 4) + instruction.to_string().substr(26, 6) + 
-                                instruction.to_string().substr(8, 1) + instruction.to_string().substr(32, 1) + string("0"));
+                addressExtend = bitset<32>(string(19, '1') + instruction.to_string().substr(31, 1) + instruction.to_string().substr(7, 1) +
+                                        instruction.to_string().substr(25, 6) +instruction.to_string().substr(8, 4) + string("0"));
                }
            
             else {                                          // 正数
-                addressExtend = bitset<32>(string(19, '0') + instruction.to_string().substr(9, 4) + instruction.to_string().substr(26, 6) + 
-                                instruction.to_string().substr(8, 1) + instruction.to_string().substr(32, 1) + string("0"));
+                addressExtend = bitset<32>(string(19, '0') + instruction.to_string().substr(31, 1) + instruction.to_string().substr(7, 1) +
+                                         instruction.to_string().substr(25, 6) +instruction.to_string().substr(8, 4) + string("0"));
              }
              PC = bitset<32>(PC.to_ulong() + addressExtend.to_ulong());
         }
         else if (isJType[0]) {
             bitset<32> addressExtend2;
             
-            addressExtend2 = bitset<32>(string(11, '0') + instruction.to_string().substr(22, 10) + instruction.to_string().substr(21, 1) +
-                                instruction.to_string().substr(12, 8) + instruction.to_string().substr(32, 1) + string("0"));               
+            addressExtend2 = bitset<32>(string(11, '0') + instruction.to_string().substr(31, 1) + instruction.to_string().substr(12, 8)  +
+                                        instruction.to_string().substr(20, 1)+  instruction.to_string().substr(21, 10)+string("0"));             
             PC = bitset<32>(PC.to_ulong() + 4 + addressExtend2.to_ulong());
         }
         else {
              PC = bitset<32>(PC.to_ulong() + 4 );
         }
+        
+        
         
         myRF.OutputRF(); // dump RF;    
     }
