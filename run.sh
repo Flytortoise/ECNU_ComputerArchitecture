@@ -2,25 +2,32 @@
 
 WORK_PATH=$(pwd)
 OUT_PATH=${WORK_PATH}/out/
-code_PATH=${WORK_PATH}/code/
+CODE_PATH=${WORK_PATH}/code/
+FILE_PATH=${WORK_PATH}/file/
 
-echo "-----run.sh begin $(date) -----"
+
+echo "shell  -----run.sh begin $(date) -----"
 
 if [ ! -d ${OUT_PATH} ];then
     mkdir ${OUT_PATH};fi
 
-if [ ! -d ${code_PATH} ];then
-    echo "FAILED:no ${code_PATH}, exit";exit 1;fi
+if [ ! -d ${CODE_PATH} ];then
+    echo "shell  FAILED:no ${CODE_PATH}, exit";exit 1;fi
 
 if [ ! -n "$1" ];then
-    echo "make simulator and run it"
-    cd ${code_PATH} && make clean && make simulator && cd ${OUT_PATH}
-    ./simulator.bin
+    echo "shell  make simulator and run it"
+    make clean && make simulator && cd ${OUT_PATH}
+    echo "shell ----- start simulator -----"
+    ./simulator.bin ${FILE_PATH}
+    echo "shell ----- end simulator -----"
 else
-    echo "make compiler and run it"
-    cd ${code_PATH} && make clean && make compiler && cd ${OUT_PATH}
-    ./compiler.bin;fi
+    echo "shell  make compiler and run it"
+    make clean && make compiler && cd ${OUT_PATH}
+    echo "shell ----- start compiler -----"
+    ./compiler.bin
+    echo "shell ----- end compiler -----"
+fi;
 
-echo "-----run.sh end   $(date) -----"
+echo "shell  -----run.sh end   $(date) -----"
 
 
