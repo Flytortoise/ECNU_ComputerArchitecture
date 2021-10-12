@@ -9,7 +9,7 @@ bool RISC_Instruction::Sync() {
 }
 
 void RISC_Instruction::print() {
-    RISC_DEBUG::COUT(m_name + ':', m_Instruction.to_string());
+    RISC_DEBUG::COUT(string("\n") + m_name + ':', m_Instruction.to_string());
 }
 
 bool RISC_Instruction::isReady() {
@@ -98,11 +98,11 @@ bool RISC_SBType::Sync() {
     m_rs1 = bitset<RS1_SIZE>(GetBitSetValue(m_Instruction, tmp_index, RS1_SIZE)); tmp_index += m_rs1.size();
     m_rs2 = bitset<RS2_SIZE>(GetBitSetValue(m_Instruction, tmp_index, RS2_SIZE)); tmp_index += m_rs2.size();
     if (m_Instruction[INS_SIZE-1] == 1) {
-        m_imm = bitset<INS_SIZE>(string(19, '1') + GetBitSetValue(m_Instruction, 31, 1) + GetBitSetValue(m_Instruction, 7, 1) +
-                                        GetBitSetValue(m_Instruction, 25, 6) + GetBitSetValue(m_Instruction, 8, 4) + string("0"));
+        m_imm = bitset<INS_SIZE>(string(18, '1') + GetBitSetValue(m_Instruction, 31, 1) + GetBitSetValue(m_Instruction, 7, 1) +
+                                        GetBitSetValue(m_Instruction, 25, 6) + GetBitSetValue(m_Instruction, 8, 4) + string("00"));
     } else {
-        m_imm = bitset<INS_SIZE>(string(19, '0') + GetBitSetValue(m_Instruction, 31, 1) + GetBitSetValue(m_Instruction, 7, 1) +
-                                        GetBitSetValue(m_Instruction, 25, 6) + GetBitSetValue(m_Instruction, 8, 4) + string("0"));
+        m_imm = bitset<INS_SIZE>(string(18, '0') + GetBitSetValue(m_Instruction, 31, 1) + GetBitSetValue(m_Instruction, 7, 1) +
+                                        GetBitSetValue(m_Instruction, 25, 6) + GetBitSetValue(m_Instruction, 8, 4) + string("00"));
     }
 
     if (m_name.empty())
@@ -114,11 +114,7 @@ bool RISC_UType::Sync() {
     RISC_Instruction::Sync();
     int tmp_index = OP_SIZE;
     m_rd = bitset<RD_SIZE>(GetBitSetValue(m_Instruction, tmp_index, RD_SIZE)); tmp_index += m_rd.size();
-    if (m_Instruction[INS_SIZE-1] == 1) {       // this is need ??? TBD
-        m_imm = bitset<INS_SIZE>(string(INS_SIZE-U_IMM, '1') + GetBitSetValue(m_Instruction, tmp_index, U_IMM));
-    } else {
-        m_imm = bitset<INS_SIZE>(string(INS_SIZE-U_IMM, '0') + GetBitSetValue(m_Instruction, tmp_index, U_IMM));
-    }
+    m_imm = bitset<INS_SIZE>(GetBitSetValue(m_Instruction, tmp_index, U_IMM) + string(INS_SIZE-U_IMM, '0'));
     
     if (m_name.empty())
         m_name = "UType";
@@ -130,11 +126,11 @@ bool RISC_UJType::Sync() {
     int tmp_index = OP_SIZE;
     m_rd = bitset<RD_SIZE>(GetBitSetValue(m_Instruction, tmp_index, RD_SIZE)); tmp_index += m_rd.size();
     if (m_Instruction[INS_SIZE-1] == 1) {        // this is need ??? TBD
-        m_imm = bitset<INS_SIZE>(string(11, '1') + GetBitSetValue(m_Instruction, 31, 1) + GetBitSetValue(m_Instruction, 12, 8)  +
-                                        GetBitSetValue(m_Instruction, 20, 1)+ GetBitSetValue(m_Instruction, 21, 10)+string("0"));
+        m_imm = bitset<INS_SIZE>(string(10, '1') + GetBitSetValue(m_Instruction, 31, 1) + GetBitSetValue(m_Instruction, 12, 8)  +
+                                        GetBitSetValue(m_Instruction, 20, 1)+ GetBitSetValue(m_Instruction, 21, 10)+string("00"));
     } else {
-        m_imm = bitset<INS_SIZE>(string(11, '0') + GetBitSetValue(m_Instruction, 31, 1) + GetBitSetValue(m_Instruction, 12, 8)  +
-                                        GetBitSetValue(m_Instruction, 20, 1)+ GetBitSetValue(m_Instruction, 21, 10)+string("0"));
+        m_imm = bitset<INS_SIZE>(string(10, '0') + GetBitSetValue(m_Instruction, 31, 1) + GetBitSetValue(m_Instruction, 12, 8)  +
+                                        GetBitSetValue(m_Instruction, 20, 1)+ GetBitSetValue(m_Instruction, 21, 10)+string("00"));
     }
 
     if (m_name.empty())

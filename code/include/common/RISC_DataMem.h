@@ -12,7 +12,11 @@ class DataMem
 public:
     bitset<64> readdata;
     DataMem(const string &inFileName, const string &outFileName);
-    bitset<32> MemoryAccess(bitset<64> Address, bitset<64> WriteData, bitset<1> readmem, bitset<1> writemem);
+    // bitset<32> MemoryAccess(bitset<64> Address, bitset<64> WriteData, bitset<1> readmem, bitset<1> writemem);
+
+    bitset<32> LoadMemory(bitset<64> Address);
+    void StoreMemory(bitset<64> Address, bitset<64> data);
+    void StoreMemory(bitset<64> Address, bitset<32> data);
 
     void OutputDataMem();
 

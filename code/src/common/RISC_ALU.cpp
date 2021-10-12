@@ -39,8 +39,10 @@ bitset<REG_BIT_NUM> RISC_ALU::ALUOperation(EM_RISC_INS ALUOP, bitset<REG_BIT_NUM
         break;
     case EM_BEQ:
         result = bitset<REG_BIT_NUM>(oprand1.to_ulong() - oprand2.to_ulong());
+        RISC_DEBUG::COUT("ALU BEQ reault:", result.to_string());
         break;
     case EM_JAL:
+        result = oprand1;
         break;
     case EM_LD:
         result = bitset<REG_BIT_NUM>(oprand1.to_ulong() + oprand2.to_ulong());

@@ -4,7 +4,7 @@
 
 RISC_RF_Data *RISC_RF_Data::m_ptr = nullptr;
 vector<bitset<REG_BIT_NUM>> RISC_RF_Data::m_registers;
-string RISC_RF_Data::m_outFileName;
+string RISC_RF_Data::m_outFileName = "RFresult.txt";
 RISC_RF_Data *RISC_RF_Data::GetInstance() {
     if (m_ptr == nullptr) {
         m_ptr = new RISC_RF_Data();
@@ -45,6 +45,9 @@ bitset<REG_BIT_NUM> RISC_RF_Data::GetRegData(unsigned int reg_index) {
 }
 
 void RISC_RF_Data::SetRegData(unsigned int reg_index, bitset<REG_BIT_NUM> reg_data) {
+    RISC_DEBUG::COUT("set reg_index:", std::to_string(reg_index));
+    RISC_DEBUG::COUT("set reg_data:", reg_data.to_string());
+
     m_registers[reg_index] = reg_data;
 }
 
@@ -61,6 +64,10 @@ void RISC_RF_Op_RType::RF_Func() {
     RISC_RF_Op::checkType(m_type);
     m_rs1 = m_rf_data->GetRegData(m_type->getRS1().to_ulong());
     m_rs2 = m_rf_data->GetRegData(m_type->getRS2().to_ulong());
+    RISC_DEBUG::COUT("func Rtype rs1 index:",m_type->getRS1().to_string());
+    RISC_DEBUG::COUT("func Rtype m_rs1:",m_rs1.to_string());
+    RISC_DEBUG::COUT("func Rtype rs2 index:",m_type->getRS2().to_string());
+    RISC_DEBUG::COUT("func Rtype m_rs2:",m_rs2.to_string());
 }
 
 void RISC_RF_Op_IType::RF_Func() {
@@ -74,12 +81,22 @@ void RISC_RF_Op_SType::RF_Func() {
     RISC_RF_Op::checkType(m_type);
     m_rs1 = m_rf_data->GetRegData(m_type->getRS1().to_ulong());
     m_rs2 = m_rf_data->GetRegData(m_type->getRS2().to_ulong());
+    RISC_DEBUG::COUT("func stype rs1 index:",m_type->getRS1().to_string());
+    RISC_DEBUG::COUT("func stype m_rs1:",m_rs1.to_string());
+    RISC_DEBUG::COUT("func stype rs2 index:",m_type->getRS2().to_string());
+    RISC_DEBUG::COUT("func stype m_rs2:",m_rs2.to_string());
 }
 
 void RISC_RF_Op_SBType::RF_Func() {
     RISC_RF_Op::checkType(m_type);
     m_rs1 = m_rf_data->GetRegData(m_type->getRS1().to_ulong());
     m_rs2 = m_rf_data->GetRegData(m_type->getRS2().to_ulong());
+    RISC_DEBUG::COUT("func sbtype rs1 index:",m_type->getRS1().to_string());
+    RISC_DEBUG::COUT("func sbtype m_rs1:",m_rs1.to_string());
+    RISC_DEBUG::COUT("func sbtype rs2 index:",m_type->getRS2().to_string());
+    RISC_DEBUG::COUT("func sbtype m_rs2:",m_rs2.to_string());
+    RISC_DEBUG::COUT("func sbtype imm:",m_type->getIMM().to_string());
+    
 }
 
 void RISC_RF_Op_UType::RF_Func() {
@@ -93,6 +110,8 @@ void RISC_RF_Op_UJType::RF_Func() {
 void RISC_RF_Op_RType::RF_Func_back() {
     RISC_RF_Op::checkType(m_type);
     m_rf_data->SetRegData(m_type->getRD().to_ulong(), m_rd);
+    RISC_DEBUG::COUT("funcback rType get rd:",m_type->getRD().to_string());
+    RISC_DEBUG::COUT("funcback rType rd:", m_rd.to_string());
 }
 
 void RISC_RF_Op_IType::RF_Func_back() {

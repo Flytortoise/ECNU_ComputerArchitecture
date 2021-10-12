@@ -30,6 +30,7 @@ int main(int argc, char *argv[])
     bitset<32> PC;
 
     while (1) {
+        RISC_DEBUG::COUT("start PC:", to_string(PC.to_ulong()));
         // 1. Fetch Instruction
         bitset<32> instruction = myInsMem.ReadMemory(PC);
         RISC_Instruction *ins_obj = risc_control->GetINSObject(instruction);
@@ -53,12 +54,21 @@ int main(int argc, char *argv[])
         risc_control->ALU_Func();
 
         // 4. Read/Write Mem(Memory Access)
+        risc_control->DataMem_Func(myDataMem);
 
         // 5. Register File Update(Write Back)
         risc_control->RF_Func_back();
 
         // Update pc
-        PC = bitset<32>(PC.to_ulong() + 4);
+        if (risc_control->GetCurrentINSEm() == EM_BEQ && 
+            risc_control->GetCurrentALUResult().to_ulong() == 0) {
+            PC = bitset<32>(PC.to_ulong() + risc_control->GetBEQImm().to_ulong());
+        } else if (risc_control->GetCurrentINSEm() == EM_JAL) {
+            PC = bitset<32>(PC.to_ulong() + 4 + risc_control->GetCurrentALUResult().to_ulong());
+        } else {
+            PC = bitset<32>(PC.to_ulong() + 4);
+        }
+        RISC_DEBUG::COUT("after update PC:", to_string(PC.to_ulong()));
 
         RISC_RF_Data::OutputRF();
     }

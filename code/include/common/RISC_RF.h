@@ -68,7 +68,9 @@ public:
     void RF_Func_back();
 
     bitset<REG_BIT_NUM> getRs1Data() { return m_rs1; }
-    void setRdData(bitset<REG_BIT_NUM> data) { m_rd = data; }
+    void setRdData(bitset<REG_BIT_NUM> data) { m_rd = data; 
+        RISC_DEBUG::COUT("rf itype m_rd:", m_rd.to_string());
+    }
 
 private:
     RISC_IType *m_type;

@@ -4,6 +4,7 @@ RISC_Control *RISC_Control::m_Instance = nullptr;
 map<EM_RISC_INS, std::pair<RISC_Instruction *, RISC_RF_Op *>> RISC_Control::m_map;
 EM_RISC_INS RISC_Control::m_last_get_em = EM_ADD;
 bitset<REG_BIT_NUM> RISC_Control::m_alu_result;
+bitset<32> RISC_Control::m_load_value;
 RISC_Control *RISC_Control::GetInstance() {
     if (m_Instance == nullptr) {
         m_Instance = new RISC_Control();
@@ -130,7 +131,9 @@ void RISC_Control::ALU_Func() {
             // UJ-TYPE
         case EM_JAL:
         {
-            RISC_RF_Op_UJType *tmp_type = static_cast<RISC_RF_Op_UJType *>(tmp_op);
+            // RISC_RF_Op_UJType *tmp_type = static_cast<RISC_RF_Op_UJType *>(tmp_op);
+            RISC_UJType *tmp_ins = static_cast<RISC_UJType *>(m_map[m_last_get_em].first);
+            op1 = bitset<REG_BIT_NUM>(tmp_ins->getIMM().to_string());
             break;
         }
             // S-TYPE
@@ -139,7 +142,8 @@ void RISC_Control::ALU_Func() {
         {
             RISC_RF_Op_SType *tmp_type = static_cast<RISC_RF_Op_SType *>(tmp_op);
             op1 = tmp_type->getRs1Data();
-            op2 = tmp_type->getRs2Data();
+            bitset<32> tmp_value = static_cast<RISC_Abstract_SType *>(m_map[m_last_get_em].first)->getIMM();
+            op2 = bitset<64>(tmp_value.to_string());
             break;
         }
         default:
@@ -166,11 +170,16 @@ void RISC_Control::RF_Func_back() {
         }
             // I-Type
         case EM_ADDI:
+        {
+            RISC_RF_Op_IType *tmp_type = static_cast<RISC_RF_Op_IType *>(tmp_op);
+            tmp_type->setRdData(m_alu_result);
+            break;
+        }
         case EM_LD:
         case EM_LW:
         {
             RISC_RF_Op_IType *tmp_type = static_cast<RISC_RF_Op_IType *>(tmp_op);
-            tmp_type->setRdData(m_alu_result);
+            tmp_type->setRdData(bitset<64>(m_load_value.to_string()));
             break;
         }
             // SB-TYPE
@@ -190,6 +199,7 @@ void RISC_Control::RF_Func_back() {
         case EM_SD:
         case EM_SW:
         {
+            RISC_DEBUG::COUT("control sw func back");
             RISC_RF_Op_SType *tmp_type = static_cast<RISC_RF_Op_SType *>(tmp_op);
             break;
         }
@@ -197,4 +207,30 @@ void RISC_Control::RF_Func_back() {
             break;
     }
     tmp_op->RF_Func_back();
+}
+
+void RISC_Control::DataMem_Func(DataMem& in_dataMem) {
+    switch (m_last_get_em)
+    {
+        case EM_LD:
+        case EM_LW:
+        {
+            m_load_value.reset();
+            m_load_value = in_dataMem.LoadMemory(m_alu_result);
+            RISC_DEBUG::COUT("load value:", m_load_value.to_string());
+            break;
+        }
+            // S-TYPE
+        case EM_SD:
+        case EM_SW:
+        {
+            RISC_DEBUG::COUT("control DataMem_Func");
+            RISC_RF_Op_SType *tmp_type = static_cast<RISC_RF_Op_SType *>(m_map[m_last_get_em].second);
+            in_dataMem.StoreMemory(m_alu_result, tmp_type->getRs2Data());
+            RISC_DEBUG::COUT("control DataMem_Func end");
+            break;
+        }
+        default:
+            break;
+    }
 }
