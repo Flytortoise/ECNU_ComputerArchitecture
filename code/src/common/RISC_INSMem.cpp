@@ -25,7 +25,7 @@ INSMem::INSMem(const string &inFileName) : m_inFileName(inFileName)
 
     imem.close();
 }
-#include <iostream>
+
 bitset<32> INSMem::ReadMemory(bitset<32> ReadAddress)
 {
     // TODO: implement!

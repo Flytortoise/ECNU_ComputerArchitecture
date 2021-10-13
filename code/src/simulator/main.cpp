@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
     string filePath(argv[1]);
     RISC_DEBUG::COUT("input file path:", filePath);
     INSMem myInsMem(string(filePath).append(INS_INFILE));
-    DataMem myDataMem(string(filePath).append(DATE_INFILE),string(DATE_OUTFILE));
+    DataMem myDataMem(string(filePath).append(DATE_INFILE),string(filePath).append(DATE_OUTFILE));
 
     RISC_Control *risc_control = RISC_Control::GetInstance();
 
@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
         }
         RISC_DEBUG::COUT("after update PC:", to_string(PC.to_ulong()));
 
-        RISC_RF_Data::OutputRF();
+        RISC_RF_Data::OutputRF(filePath);
     }
 
     myDataMem.OutputDataMem(); // dump data memX

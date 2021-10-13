@@ -44,11 +44,10 @@ string RevertStr(const string &str) {
     return result;
 }
 
-string GetBitSetValue(bitset<32> &data, unsigned int begin_index, const unsigned int count) {
-    string tmp_str = data.to_string();
-    std::reverse(tmp_str.begin(), tmp_str.end());
+string GetBitSetValue(string data, unsigned int begin_index, const unsigned int count) {
+    std::reverse(data.begin(), data.end());
 
-    string result = tmp_str.substr(begin_index, count);
+    string result = data.substr(begin_index, count);
     std::reverse(result.begin(), result.end());
     return result;
 }

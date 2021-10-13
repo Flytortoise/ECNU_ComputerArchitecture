@@ -212,7 +212,7 @@ void RISC_Control::RF_Func_back() {
 void RISC_Control::DataMem_Func(DataMem& in_dataMem) {
     switch (m_last_get_em)
     {
-        case EM_LD:
+        case EM_LD:     // no
         case EM_LW:
         {
             m_load_value.reset();
@@ -221,12 +221,12 @@ void RISC_Control::DataMem_Func(DataMem& in_dataMem) {
             break;
         }
             // S-TYPE
-        case EM_SD:
+        case EM_SD:     // no SD
         case EM_SW:
         {
             RISC_DEBUG::COUT("control DataMem_Func");
             RISC_RF_Op_SType *tmp_type = static_cast<RISC_RF_Op_SType *>(m_map[m_last_get_em].second);
-            in_dataMem.StoreMemory(m_alu_result, tmp_type->getRs2Data());
+            in_dataMem.StoreMemory(m_alu_result, bitset<32>(GetBitSetValue(tmp_type->getRs2Data().to_string(), 0, 32)));
             RISC_DEBUG::COUT("control DataMem_Func end");
             break;
         }

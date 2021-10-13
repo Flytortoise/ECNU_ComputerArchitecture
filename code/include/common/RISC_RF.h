@@ -22,7 +22,7 @@ public:
     static void SetRegData(unsigned int reg_index, bitset<REG_BIT_NUM> reg_data);
     static void SetOutFileName(const string& outfile);
 
-    static void OutputRF();
+    static void OutputRF(string);
 
 private:
     RISC_RF_Data();

@@ -20,10 +20,10 @@ RISC_RF_Data::RISC_RF_Data() {
     RISC_RF_Data::m_registers.resize(REG_NUM);
 }
 
-void RISC_RF_Data::OutputRF() {
+void RISC_RF_Data::OutputRF(string filePath) {
     if (!RISC_RF_Data::m_outFileName.empty()) {
         std::ofstream rfout;
-        rfout.open(m_outFileName.c_str(), std::ios_base::app);
+        rfout.open(filePath.append(m_outFileName).c_str());
         if (rfout.is_open())
         {
             rfout << "A state of RF:" << std::endl;
