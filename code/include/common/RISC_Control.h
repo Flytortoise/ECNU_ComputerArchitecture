@@ -34,7 +34,8 @@ private:
     static map<EM_RISC_INS, std::pair<RISC_Instruction *, RISC_RF_Op *>> m_map;
     static EM_RISC_INS m_last_get_em;
     static bitset<REG_BIT_NUM> m_alu_result;
-    static bitset<32> m_load_value;
+    static bitset<32> m_load32_value;
+    static bitset<64> m_load64_value;
 };
 
 #endif

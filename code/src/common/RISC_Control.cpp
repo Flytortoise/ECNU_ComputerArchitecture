@@ -4,7 +4,8 @@ RISC_Control *RISC_Control::m_Instance = nullptr;
 map<EM_RISC_INS, std::pair<RISC_Instruction *, RISC_RF_Op *>> RISC_Control::m_map;
 EM_RISC_INS RISC_Control::m_last_get_em = EM_ADD;
 bitset<REG_BIT_NUM> RISC_Control::m_alu_result;
-bitset<32> RISC_Control::m_load_value;
+bitset<32> RISC_Control::m_load32_value;
+bitset<64> RISC_Control::m_load64_value;
 RISC_Control *RISC_Control::GetInstance() {
     if (m_Instance == nullptr) {
         m_Instance = new RISC_Control();
@@ -176,10 +177,15 @@ void RISC_Control::RF_Func_back() {
             break;
         }
         case EM_LD:
+        {
+            RISC_RF_Op_IType *tmp_type = static_cast<RISC_RF_Op_IType *>(tmp_op);
+            tmp_type->setRdData(m_load64_value);
+            break;
+        }
         case EM_LW:
         {
             RISC_RF_Op_IType *tmp_type = static_cast<RISC_RF_Op_IType *>(tmp_op);
-            tmp_type->setRdData(bitset<64>(m_load_value.to_string()));
+            tmp_type->setRdData(bitset<64>(m_load32_value.to_string()));
             break;
         }
             // SB-TYPE
@@ -199,7 +205,7 @@ void RISC_Control::RF_Func_back() {
         case EM_SD:
         case EM_SW:
         {
-            RISC_DEBUG::COUT("control sw func back");
+            RISC_DEBUG::COUT("control S-TYPE func back");
             RISC_RF_Op_SType *tmp_type = static_cast<RISC_RF_Op_SType *>(tmp_op);
             break;
         }
@@ -212,22 +218,35 @@ void RISC_Control::RF_Func_back() {
 void RISC_Control::DataMem_Func(DataMem& in_dataMem) {
     switch (m_last_get_em)
     {
-        case EM_LD:     // no
+        case EM_LD:
+        {
+            m_load64_value.reset();
+            m_load64_value = in_dataMem.Load64Memory(m_alu_result);
+            RISC_DEBUG::COUT("load 64 value:", m_load64_value.to_string());
+            break;
+        }
         case EM_LW:
         {
-            m_load_value.reset();
-            m_load_value = in_dataMem.LoadMemory(m_alu_result);
-            RISC_DEBUG::COUT("load value:", m_load_value.to_string());
+            m_load32_value.reset();
+            m_load32_value = in_dataMem.LoadMemory(m_alu_result);
+            RISC_DEBUG::COUT("load 32 value:", m_load32_value.to_string());
             break;
         }
             // S-TYPE
-        case EM_SD:     // no SD
+        case EM_SD:
+        {
+            RISC_DEBUG::COUT("control SD DataMem_Func");
+            RISC_RF_Op_SType *tmp_type = static_cast<RISC_RF_Op_SType *>(m_map[m_last_get_em].second);
+            in_dataMem.StoreMemory(m_alu_result, tmp_type->getRs2Data());
+            RISC_DEBUG::COUT("control SD DataMem_Func end");
+            break;
+        }
         case EM_SW:
         {
-            RISC_DEBUG::COUT("control DataMem_Func");
+            RISC_DEBUG::COUT("control SW DataMem_Func");
             RISC_RF_Op_SType *tmp_type = static_cast<RISC_RF_Op_SType *>(m_map[m_last_get_em].second);
             in_dataMem.StoreMemory(m_alu_result, bitset<32>(GetBitSetValue(tmp_type->getRs2Data().to_string(), 0, 32)));
-            RISC_DEBUG::COUT("control DataMem_Func end");
+            RISC_DEBUG::COUT("control SW DataMem_Func end");
             break;
         }
         default:

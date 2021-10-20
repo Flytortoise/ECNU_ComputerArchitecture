@@ -45,6 +45,17 @@ bitset<32> DataMem::LoadMemory(bitset<64> Address) {
     return bitset<32>(tmp_str);
 }
 
+bitset<64> DataMem::Load64Memory(bitset<64> Address) {
+    if (Address.to_ulong()%4 !=0 || Address.to_ulong() >= MEMSIZE)
+        throw "Load Memory: Address is error";
+    
+    string tmp_str;
+    for (int i = 0; i < 8; i++) {
+        tmp_str += DMem[Address.to_ulong() + i].to_string();
+    }
+    return bitset<64>(tmp_str);
+}
+
 void DataMem::StoreMemory(bitset<64> Address, bitset<32> data) {
     if (Address.to_ulong()%4 !=0 || Address.to_ulong() >= MEMSIZE)
         throw "Store Memory: Address is error";
