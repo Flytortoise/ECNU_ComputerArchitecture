@@ -7,7 +7,10 @@ using std::ifstream;
 using std::ofstream;
 using std::to_string;
 
-DataMem::DataMem(const string &inFileName, const string &outFileName) : m_inFileName(inFileName), m_outFileName(outFileName) {
+void DataMem::SetFileName(const string &inFileName, const string &outFileName) {
+    m_inFileName = inFileName;
+    m_outFileName = outFileName;
+
     DMem.resize(MEMSIZE);
     ifstream dmem;
     string line;
@@ -92,7 +95,7 @@ void DataMem::OutputDataMem() {
     if (dmemout.is_open())
     {
         RISC_DEBUG::COUT("write data to file:", m_outFileName);
-        for (int j = 0; j < 1000; j++)
+        for (int j = 0; j < DMem.size(); j++)
         {
             dmemout << DMem[j] << std::endl;
         }

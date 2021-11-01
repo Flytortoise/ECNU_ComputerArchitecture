@@ -16,8 +16,8 @@ using std::vector;
 
 #define RF_OUTFILE      "RFresult.txt"
 #define INS_INFILE      "imem.txt"
-#define DATE_INFILE     "dmem.txt"
-#define DATE_OUTFILE    "dmemresult.txt"
+#define DATA_INFILE     "dmem.txt"
+#define DATA_OUTFILE    "dmemresult.txt"
 
 #define ADDU 1
 #define SUBU 3

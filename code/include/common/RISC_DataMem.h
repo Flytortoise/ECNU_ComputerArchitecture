@@ -10,7 +10,8 @@ and an access to data memory class returns 8 bytes of data.
 class DataMem
 {
 public:
-    DataMem(const string &inFileName, const string &outFileName);
+    DataMem() = default;
+    void SetFileName(const string& infile, const string& outfile);
     // bitset<32> MemoryAccess(bitset<64> Address, bitset<64> WriteData, bitset<1> readmem, bitset<1> writemem);
 
     bitset<32> LoadMemory(bitset<64> Address);

@@ -7,6 +7,9 @@
 #define REG_NUM          32
 #define REG_BIT_NUM      64
 
+class RISC_RF_Op;
+RISC_RF_Op* CreateRiscOp(RISC_Instruction *ins);
+
 /*
 contains 32 64-bit registers defined as a private member. 
 Remember that register $0 is always 0. 
@@ -43,6 +46,17 @@ public:
 protected:
     RISC_RF_Data *m_rf_data;
 };
+
+class RISC_RF_Op_Halt : public RISC_RF_Op {
+public:
+    RISC_RF_Op_Halt(RISC_Halt* type) :m_type(type) {}
+    void RF_Func() {}
+    void RF_Func_back() {}
+
+private:
+    RISC_Halt* m_type;
+};
+
 
 class RISC_RF_Op_RType : public RISC_RF_Op{
 public:

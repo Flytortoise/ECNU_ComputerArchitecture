@@ -49,3 +49,30 @@ void printState(stateStruct state, int cycle) {
     else cout<<"Unable to open file";
     printstate.close();
 }
+
+
+PipeVector::PipeVector(vector<RISC_Func> data) : m_data(data) {}
+
+PipeVector::PipeVector(const PipeVector& data) : m_data(data.m_data) {}
+
+bool PipeVector::dump() {
+    return m_data[m_curr_index++]();
+}
+
+PipeLine::PipeLine(const PipeVector& data) : m_pipe_vector(data) {}
+
+void PipeLine::run() {
+    if (!stop) {
+        m_ins_vec.push_back(new PipeVector(m_pipe_vector));
+    }
+    for (list<PipeVector*>::iterator it = m_ins_vec.begin(); it != m_ins_vec.end(); ++it) {
+        if (!(*it)->dump()) {
+            this->SetStop(true);           // if read halt, end pipeline
+        }
+    }
+    if (!m_ins_vec.empty() && m_ins_vec.front()->isEnd()) {
+        PipeVector* tmp = m_ins_vec.front();
+        m_ins_vec.pop_front();
+        delete tmp;
+    }
+}

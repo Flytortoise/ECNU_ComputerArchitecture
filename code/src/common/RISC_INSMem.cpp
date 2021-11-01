@@ -3,16 +3,20 @@
 #include "RISC_INSMem.h"
 #include "RISC_DEBUG.h"
 
-INSMem::INSMem(const string &inFileName) : m_inFileName(inFileName)
+INSMem::INSMem(const string &inFileName)
 {
+    this->SetFileName(inFileName);
+}
+
+void INSMem::SetFileName(const string& filename) {
     IMem.resize(MEMSIZE);
     std::ifstream imem;
     string line;
     int i = 0;
-    imem.open(m_inFileName.c_str());
+    imem.open(filename.c_str());
     if (imem.is_open())
     {
-        RISC_DEBUG::COUT("read INSMem from file:", m_inFileName);
+        RISC_DEBUG::COUT("read INSMem from file:", filename);
         while (getline(imem, line))
         {
             IMem[i] = bitset<8>(line.substr(0, 8));
@@ -20,8 +24,8 @@ INSMem::INSMem(const string &inFileName) : m_inFileName(inFileName)
         }
 
     }
-    else 
-        RISC_DEBUG::COUT("Unable to open file:", m_inFileName);
+    else
+        RISC_DEBUG::COUT("Unable to open file:", filename);
 
     imem.close();
 }

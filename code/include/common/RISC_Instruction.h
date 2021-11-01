@@ -19,6 +19,26 @@ using std::vector;
 #define U_IMM           (INS_SIZE-OP_SIZE-RD_SIZE)
 #define UJ_IMM          (INS_SIZE-OP_SIZE-RD_SIZE)
 
+enum EM_RISC_INS {
+    EM_HALT = 0,
+    EM_ADD,
+    EM_SUB,
+    EM_ADDI,
+    EM_AND,
+    EM_OR,
+    EM_XOR,
+    EM_BEQ,
+    EM_JAL,
+    EM_LD,
+    EM_SD,
+    EM_LW,
+    EM_SW,
+    EM_END
+};
+
+class RISC_Instruction;
+RISC_Instruction* CreateRiscINS(enum EM_RISC_INS);
+
 class RISC_Instruction{
 public:
     virtual ~RISC_Instruction() = default;
@@ -27,11 +47,22 @@ public:
     virtual bool isReady();
 
     bool setInstruction(const bitset<INS_SIZE>&);
+    EM_RISC_INS getEM() { return em_flag; }
 protected:
     bitset<INS_SIZE> m_Instruction;
     bitset<OP_SIZE> m_operation;
     string m_name;
     string m_limit_op;
+    enum EM_RISC_INS em_flag;
+};
+
+class RISC_Halt : public RISC_Instruction {
+public:
+    RISC_Halt() {
+        m_limit_op = "1111111";
+        m_name = "halt";
+        em_flag = EM_HALT;
+    }
 };
 
 class RISC_RType : public RISC_Instruction{
@@ -118,23 +149,6 @@ public:
     bool Sync();
 };
 
-enum EM_RISC_INS{
-    EM_NULL = 0,
-    EM_ADD,
-    EM_SUB,
-    EM_ADDI,
-    EM_AND,
-    EM_OR,
-    EM_XOR,
-    EM_BEQ,
-    EM_JAL,
-    EM_LD,
-    EM_SD,
-    EM_LW,
-    EM_SW,
-    EM_END
-};
-
 class RISC_ADD : public RISC_RType {
 public:
     RISC_ADD(){
@@ -142,6 +156,7 @@ public:
         m_limit_funt3 = "000";
         m_limit_funt7 = "0000000";
         m_name = "add";
+        em_flag = EM_ADD;
     }
 };
 
@@ -152,6 +167,7 @@ public:
         m_limit_funt3 = "000";
         m_limit_funt7 = "0100000";
         m_name = "sub";
+        em_flag = EM_SUB;
     }
 };
 
@@ -161,6 +177,7 @@ public:
         m_limit_op = "0010011";
         m_limit_funt3 = "000";
         m_name = "addi";
+        em_flag = EM_ADDI;
     }
 };
 
@@ -171,6 +188,7 @@ public:
         m_limit_funt3 = "111";
         m_limit_funt7 = "0000000";
         m_name = "and";
+        em_flag = EM_AND;
     }
 };
 
@@ -181,6 +199,7 @@ public:
         m_limit_funt3 = "110";
         m_limit_funt7 = "0000000";
         m_name = "or";
+        em_flag = EM_OR;
     }
 };
 
@@ -191,6 +210,7 @@ public:
         m_limit_funt3 = "100";
         m_limit_funt7 = "0000000";
         m_name = "xor";
+        em_flag = EM_XOR;
     }
 };
 
@@ -200,6 +220,7 @@ public:
         m_limit_op = "1100011";
         m_limit_funt3 = "000";
         m_name = "beq";
+        em_flag = EM_BEQ;
     }
 };
 
@@ -208,6 +229,7 @@ public:
     RISC_JAL(){
         m_limit_op = "1101111";
         m_name = "jal";
+        em_flag = EM_JAL;
     }
 };
 
@@ -217,6 +239,7 @@ public:
         m_limit_op = "0000011";
         m_limit_funt3 = "011";
         m_name = "ld";
+        em_flag = EM_LD;
     }
 };
 
@@ -226,6 +249,7 @@ public:
         m_limit_op = "0100011";
         m_limit_funt3 = "011";
         m_name = "sd";
+        em_flag = EM_SD;
     }
 };
 
@@ -235,6 +259,7 @@ public:
         m_limit_op = "0000011";
         m_limit_funt3 = "010";
         m_name = "lw";
+        em_flag = EM_LW;
     }
 };
 
@@ -244,7 +269,9 @@ public:
         m_limit_op = "0100011";
         m_limit_funt3 = "010";
         m_name = "sw";
+        em_flag = EM_SW;
     }
 };
+
 
 #endif
