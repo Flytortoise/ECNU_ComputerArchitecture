@@ -12,13 +12,14 @@ An access to the instruction memory class returns 4 bytes of data; i.e., the byt
 class INSMem
 {
 public:
+    INSMem() = default;
+    INSMem(const string& inFileName);
     bitset<32> Instruction;
-    INSMem(const string &inFileName);
     bitset<32> ReadMemory(bitset<32> ReadAddress);
+    void SetFileName(const string& filename);
 
 private:
     vector<bitset<8>> IMem;
-    string m_inFileName;
 };
 
 

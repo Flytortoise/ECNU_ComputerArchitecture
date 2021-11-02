@@ -27,7 +27,7 @@ void RISC_RF_Data::OutputRF(string filePath) {
         if (rfout.is_open())
         {
             rfout << "A state of RF:" << std::endl;
-            for (int j = 0; j < REG_BIT_NUM; j++)
+            for (int j = 0; j < REG_NUM; j++)
             {
                 rfout << RISC_RF_Data::m_registers[j] << std::endl;
             }
@@ -128,4 +128,52 @@ void RISC_RF_Op_Abstract_SType::RF_Func_back() {
 void RISC_RF_Op_Abstract_UType::RF_Func_back() {
     RISC_RF_Op::checkType(m_type);
     m_rf_data->SetRegData(m_type->getRD().to_ulong(), m_rd);
+}
+
+RISC_RF_Op* CreateRiscOp(RISC_Instruction* tmp_ins) {
+    RISC_RF_Op* result = nullptr;
+    switch (tmp_ins->getEM())
+    {
+    case EM_ADD:
+        result = new RISC_RF_Op_RType(static_cast<RISC_RType*>(tmp_ins));
+        break;
+    case EM_SUB:
+        result = new RISC_RF_Op_RType(static_cast<RISC_RType*>(tmp_ins));
+        break;
+    case EM_ADDI:
+        result = new RISC_RF_Op_IType(static_cast<RISC_IType*>(tmp_ins));
+        break;
+    case EM_AND:
+        result = new RISC_RF_Op_RType(static_cast<RISC_RType*>(tmp_ins));
+        break;
+    case EM_OR:
+        result = new RISC_RF_Op_RType(static_cast<RISC_RType*>(tmp_ins));
+        break;
+    case EM_XOR:
+        result = new RISC_RF_Op_RType(static_cast<RISC_RType*>(tmp_ins));
+        break;
+    case EM_BEQ:
+        result = new RISC_RF_Op_SBType(static_cast<RISC_SBType*>(tmp_ins));
+        break;
+    case EM_JAL:
+        result = new RISC_RF_Op_UJType(static_cast<RISC_UJType*>(tmp_ins));
+        break;
+    case EM_LD:
+        result = new RISC_RF_Op_IType(static_cast<RISC_IType*>(tmp_ins));
+        break;
+    case EM_SD:
+        result = new RISC_RF_Op_SType(static_cast<RISC_SType*>(tmp_ins));
+        break;
+    case EM_LW:
+        result = new RISC_RF_Op_IType(static_cast<RISC_IType*>(tmp_ins));
+        break;
+    case EM_SW:
+        result = new RISC_RF_Op_SType(static_cast<RISC_SType*>(tmp_ins));
+        break;
+    default:
+        result = new RISC_RF_Op_Halt(static_cast<RISC_Halt*>(tmp_ins));
+        break;
+    }
+    return result;
+
 }

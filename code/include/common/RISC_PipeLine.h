@@ -2,8 +2,12 @@
 #define RISC_PIPE_LINE_H_
 
 #include <bitset>
+#include <vector>
+#include <string>
+#include <list>
 #include "RISC_RF.h"
 using std::bitset;
+typedef bool(*RISC_Func)();
 
 struct IFStruct {
     bitset<32>  PC;
@@ -60,5 +64,41 @@ struct stateStruct {
 };
 
 void printState(stateStruct state, int cycle);
+
+class PipeVector {
+public:
+    PipeVector(std::vector<RISC_Func> data);
+
+    PipeVector(const PipeVector& data);
+
+    bool dump();
+
+    bool isEnd() {
+        return m_curr_index == m_data.size() ? true : false;
+    }
+
+private:
+    int m_curr_index = 0;
+    std::vector<RISC_Func> m_data;
+
+};
+
+class PipeLine {
+public:
+    PipeLine(const PipeVector& data);
+
+    void run();
+    void start() { run();  }
+
+    bool isContinue() {
+        return !m_ins_vec.empty();
+    }
+
+private:
+    PipeVector m_pipe_vector;
+    std::list<PipeVector*> m_ins_vec;
+};
+
+
 
 #endif
