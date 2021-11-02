@@ -94,14 +94,9 @@ public:
         return !m_ins_vec.empty();
     }
 
-    void SetStop(bool data) {
-        this->stop = data;
-    }
-
 private:
     PipeVector m_pipe_vector;
     std::list<PipeVector*> m_ins_vec;
-    bool stop = false;
 };
 
 

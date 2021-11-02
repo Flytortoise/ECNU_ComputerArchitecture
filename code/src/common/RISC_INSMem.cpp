@@ -35,7 +35,7 @@ bitset<32> INSMem::ReadMemory(bitset<32> ReadAddress)
     // TODO: implement!
     // (Read the byte at the ReadAddress and the following three byte).
     Instruction.reset();            // memecpy zero
-    auto IMem_Index = ReadAddress.to_ullong();
+    unsigned int IMem_Index = ReadAddress.to_ulong();
     int IMen_ItemSize = IMem[0].size();     // 8
     int tmp_value = Instruction.size()/IMen_ItemSize;   // 4
     if ((IMem_Index < IMem.size()) && (IMem_Index % tmp_value == 0)) {

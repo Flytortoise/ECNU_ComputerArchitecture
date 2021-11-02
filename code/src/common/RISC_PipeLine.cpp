@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include "RISC_PipeLine.h"
+#include "RISC_Control.h"
 using namespace std;
 
 void printState(stateStruct state, int cycle) {
@@ -56,18 +57,30 @@ PipeVector::PipeVector(vector<RISC_Func> data) : m_data(data) {}
 PipeVector::PipeVector(const PipeVector& data) : m_data(data.m_data) {}
 
 bool PipeVector::dump() {
-    return m_data[m_curr_index++]();
+    bool result = m_data[m_curr_index]();
+    if (m_curr_index != 1) {     // not id .then ++
+        m_curr_index++;
+    }
+    else if (result){           // id, but run true
+        m_curr_index++;
+    }
+
+    return result;
 }
 
 PipeLine::PipeLine(const PipeVector& data) : m_pipe_vector(data) {}
 
+
+
 void PipeLine::run() {
-    if (!stop) {
+    RISC_Control* risc_control = RISC_Control::GetInstance();
+
+    if (!risc_control->isHalt() && !risc_control->isPause()) {
         m_ins_vec.push_back(new PipeVector(m_pipe_vector));
     }
     for (list<PipeVector*>::iterator it = m_ins_vec.begin(); it != m_ins_vec.end(); ++it) {
         if (!(*it)->dump()) {
-            this->SetStop(true);           // if read halt, end pipeline
+            break;
         }
     }
     if (!m_ins_vec.empty() && m_ins_vec.front()->isEnd()) {

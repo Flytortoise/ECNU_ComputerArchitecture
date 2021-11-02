@@ -9,12 +9,13 @@ std::string RISC_Control::m_filepath = "./";
 INSMem RISC_Control::m_ins;
 bitset<32> RISC_Control::m_PC;
 bool RISC_Control::m_is_halt = false;
+bool RISC_Control::m_is_pause = false;
 
-std::queue<bitset<REG_BIT_NUM>> RISC_Control::m_alu_queue;
-std::queue<std::pair<RISC_Instruction*, RISC_RF_Op*> *> RISC_Control::m_if_id_queue;
-std::queue<std::pair<RISC_Instruction*, RISC_RF_Op*> *> RISC_Control::m_id_ex_queue;
-std::queue<std::pair<RISC_Instruction*, RISC_RF_Op*> *> RISC_Control::m_ex_me_queue;
-std::queue<std::pair<RISC_Instruction*, RISC_RF_Op*> *> RISC_Control::m_me_wb_queue;
+std::list<bitset<REG_BIT_NUM>> RISC_Control::m_alu_result;
+std::list<std::pair<RISC_Instruction*, RISC_RF_Op*> *> RISC_Control::m_if_id;
+std::list<std::pair<RISC_Instruction*, RISC_RF_Op*> *> RISC_Control::m_id_ex;
+std::list<std::pair<RISC_Instruction*, RISC_RF_Op*> *> RISC_Control::m_ex_me;
+std::list<std::pair<RISC_Instruction*, RISC_RF_Op*> *> RISC_Control::m_me_wb;
 
 RISC_Control *RISC_Control::GetInstance() {
     if (m_Instance == nullptr) {
@@ -57,7 +58,7 @@ RISC_Instruction *RISC_Control::GetINSObject(const bitset<INS_SIZE> &in_data) {
             tmp_ins->setInstruction(in_data);
             std::pair<RISC_Instruction*, RISC_RF_Op*>* tmp_pair = 
                     new std::pair<RISC_Instruction*, RISC_RF_Op*>(tmp_ins, CreateRiscOp(tmp_ins));
-            m_if_id_queue.push(tmp_pair);
+            m_if_id.push_back(tmp_pair);
             return tmp_ins;
         }
     }
@@ -102,15 +103,32 @@ bool RISC_Control::IF() {
 }
 
 void RISC_Control::RF_Func() {
-    std::pair<RISC_Instruction*, RISC_RF_Op*> *tmp_pair = m_if_id_queue.front();
+    std::pair<RISC_Instruction*, RISC_RF_Op*>* tmp_pair = m_if_id.front();
+
+    std::pair<RISC_Instruction*, RISC_RF_Op*>* check_pair_1 = nullptr;
+    std::pair<RISC_Instruction*, RISC_RF_Op*>* check_pair_2 = nullptr;
+   
+    if (m_ex_me.size() > 0) {
+        check_pair_1 = m_ex_me.front();
+    }
+
+    if (m_me_wb.size() > 0) {
+        check_pair_2 = m_me_wb.front();
+    }
+
+    if (CheckDependence(tmp_pair, check_pair_1, check_pair_2)) {
+        m_is_pause = true;
+        return;
+    }
+
     tmp_pair->second->RF_Func();
     
-    m_if_id_queue.pop();
-    m_id_ex_queue.push(tmp_pair);
+    m_if_id.pop_front();
+    m_id_ex.push_back(tmp_pair);
 }
 
 void RISC_Control::ALU_Func() {
-    std::pair<RISC_Instruction*, RISC_RF_Op*>* tmp_pair = m_id_ex_queue.front();
+    std::pair<RISC_Instruction*, RISC_RF_Op*>* tmp_pair = m_id_ex.front();
 
     RISC_RF_Op *tmp_op = tmp_pair->second;
     bitset<REG_BIT_NUM> op1, op2;
@@ -176,15 +194,14 @@ void RISC_Control::ALU_Func() {
             break;
     }
 
-    m_alu_queue.push(RISC_ALU::ALUOperation(tmp_pair->first->getEM(), op1, op2));
-    m_id_ex_queue.pop();
-    m_ex_me_queue.push(tmp_pair);
+    m_alu_result.push_back(RISC_ALU::ALUOperation(tmp_pair->first->getEM(), op1, op2));
+    m_id_ex.pop_front();
+    m_ex_me.push_back(tmp_pair);
 }
 
 void RISC_Control::RF_Func_back() {
-    std::pair<RISC_Instruction*, RISC_RF_Op*>* tmp_pair = m_me_wb_queue.front();
+    std::pair<RISC_Instruction*, RISC_RF_Op*>* tmp_pair = m_me_wb.front();
     RISC_RF_Op *tmp_op = tmp_pair->second;
-    bitset<REG_BIT_NUM> alu_result = m_alu_queue.front();
     switch (tmp_pair->first->getEM())
     {
             // R-TYPE
@@ -194,17 +211,19 @@ void RISC_Control::RF_Func_back() {
         case EM_OR:
         case EM_XOR: 
         {
+            bitset<REG_BIT_NUM> alu_result = m_alu_result.front();
             RISC_RF_Op_RType *tmp_type = static_cast<RISC_RF_Op_RType *>(tmp_op);
             tmp_type->setRdData(alu_result);
-            m_alu_queue.pop();
+            m_alu_result.pop_front();
             break;
         }
             // I-Type
         case EM_ADDI:
         {
+            bitset<REG_BIT_NUM> alu_result = m_alu_result.front();
             RISC_RF_Op_IType *tmp_type = static_cast<RISC_RF_Op_IType *>(tmp_op);
             tmp_type->setRdData(alu_result);
-            m_alu_queue.pop();
+            m_alu_result.pop_front();
             break;
         }
         case EM_LD:
@@ -228,9 +247,10 @@ void RISC_Control::RF_Func_back() {
             // UJ-TYPE
         case EM_JAL:
         {
+            bitset<REG_BIT_NUM> alu_result = m_alu_result.front();
             RISC_RF_Op_UJType *tmp_type = static_cast<RISC_RF_Op_UJType *>(tmp_op);
             tmp_type->setRdData(alu_result);
-            m_alu_queue.pop();
+            m_alu_result.pop_front();
             break;
         }
             // S-TYPE
@@ -246,22 +266,27 @@ void RISC_Control::RF_Func_back() {
     }
     tmp_op->RF_Func_back();
 
-    m_me_wb_queue.pop();
+    if (tmp_pair->first->getDependence() && m_is_pause) {
+        tmp_pair->first->setDependence(false);
+        m_is_pause = false;     //resume pipeline
+    }
+
+    m_me_wb.pop_front();
     delete tmp_pair->second;
     delete tmp_pair->first;
     delete tmp_pair;
 }
 
 void RISC_Control::DataMem_Func() {
-    std::pair<RISC_Instruction*, RISC_RF_Op*>* tmp_pair = m_ex_me_queue.front();
-    bitset<REG_BIT_NUM> alu_result = m_alu_queue.front();
+    std::pair<RISC_Instruction*, RISC_RF_Op*>* tmp_pair = m_ex_me.front();
+    bitset<REG_BIT_NUM> alu_result = m_alu_result.front();
     switch (tmp_pair->first->getEM())
     {
         case EM_LD:
         {
             m_load64_value.reset();
             m_load64_value = m_data_mem.Load64Memory(alu_result);
-            m_alu_queue.pop();
+            m_alu_result.pop_front();
             RISC_DEBUG::COUT("load 64 value:", m_load64_value.to_string());
             break;
         }
@@ -269,7 +294,7 @@ void RISC_Control::DataMem_Func() {
         {
             m_load32_value.reset();
             m_load32_value = m_data_mem.LoadMemory(alu_result);
-            m_alu_queue.pop();
+            m_alu_result.pop_front();
             RISC_DEBUG::COUT("load 32 value:", m_load32_value.to_string());
             break;
         }
@@ -279,7 +304,7 @@ void RISC_Control::DataMem_Func() {
             RISC_DEBUG::COUT("control SD DataMem_Func");
             RISC_RF_Op_SType *tmp_type = static_cast<RISC_RF_Op_SType *>(tmp_pair->second);
             m_data_mem.StoreMemory(alu_result, tmp_type->getRs2Data());
-            m_alu_queue.pop();
+            m_alu_result.pop_front();
             RISC_DEBUG::COUT("control SD DataMem_Func end");
             break;
         }
@@ -288,13 +313,13 @@ void RISC_Control::DataMem_Func() {
             RISC_DEBUG::COUT("control SW DataMem_Func");
             RISC_RF_Op_SType *tmp_type = static_cast<RISC_RF_Op_SType *>(tmp_pair->second);
             m_data_mem.StoreMemory(alu_result, bitset<32>(GetBitSetValue(tmp_type->getRs2Data().to_string(), 0, 32)));
-            m_alu_queue.pop();
+            m_alu_result.pop_front();
             RISC_DEBUG::COUT("control SW DataMem_Func end");
             break;
         }
         default:
             break;
     }
-    m_ex_me_queue.pop();
-    m_me_wb_queue.push(tmp_pair);
+    m_ex_me.pop_front();
+    m_me_wb.push_back(tmp_pair);
 }

@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "RISC_Instruction.h"
+#include "RISC_DEBUG.h"
 
 #define REG_NUM          32
 #define REG_BIT_NUM      64

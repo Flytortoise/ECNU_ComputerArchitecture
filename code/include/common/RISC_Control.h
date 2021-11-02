@@ -10,6 +10,7 @@
 #include <vector>
 #include <string>
 #include <queue>
+#include <list>
 using std::vector;
 
 class RISC_Control {
@@ -28,7 +29,7 @@ public:
         RISC_DEBUG::COUT("----------ID start----------");
         RISC_Control::RF_Func(); 
         RISC_DEBUG::COUT("----------ID end----------");
-        return true; 
+        return !isPause();
     }
 
     static bool EX() { 
@@ -67,6 +68,7 @@ public:
     //}
 
     static bool isHalt() { return m_is_halt;  }
+    static bool isPause() { return m_is_pause; }
 
 private:
     RISC_Control();
@@ -80,12 +82,13 @@ private:
     static INSMem m_ins;
     static bitset<32> m_PC;
     static bool m_is_halt;
+    static bool m_is_pause;
 
-    static std::queue<std::pair<RISC_Instruction*, RISC_RF_Op*> *> m_if_id_queue;
-    static std::queue<std::pair<RISC_Instruction*, RISC_RF_Op*> *> m_id_ex_queue;
-    static std::queue<std::pair<RISC_Instruction*, RISC_RF_Op*> *> m_ex_me_queue;
-    static std::queue<std::pair<RISC_Instruction*, RISC_RF_Op*> *> m_me_wb_queue;
-    static std::queue<bitset<REG_BIT_NUM>> m_alu_queue;
+    static std::list<std::pair<RISC_Instruction*, RISC_RF_Op*> *> m_if_id;
+    static std::list<std::pair<RISC_Instruction*, RISC_RF_Op*> *> m_id_ex;
+    static std::list<std::pair<RISC_Instruction*, RISC_RF_Op*> *> m_ex_me;
+    static std::list<std::pair<RISC_Instruction*, RISC_RF_Op*> *> m_me_wb;
+    static std::list<bitset<REG_BIT_NUM>> m_alu_result;
 };
 
 #endif

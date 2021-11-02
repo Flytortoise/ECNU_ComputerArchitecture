@@ -45,15 +45,21 @@ public:
     virtual bool Sync();
     virtual void print();
     virtual bool isReady();
+    virtual bool isDependence(RISC_Instruction*);
 
     bool setInstruction(const bitset<INS_SIZE>&);
-    EM_RISC_INS getEM() { return em_flag; }
+    enum EM_RISC_INS getEM() { return em_flag; }
+    bool getDependence() { return m_is_dependence; }
+    void setDependence(bool data) { m_is_dependence = data; }
+    bitset<INS_SIZE> getINS() { return m_Instruction; }
+
 protected:
     bitset<INS_SIZE> m_Instruction;
     bitset<OP_SIZE> m_operation;
     string m_name;
     string m_limit_op;
     enum EM_RISC_INS em_flag;
+    bool m_is_dependence = false;
 };
 
 class RISC_Halt : public RISC_Instruction {
@@ -69,6 +75,7 @@ class RISC_RType : public RISC_Instruction{
 public:
     bool Sync();
     bool isReady();
+    bool isDependence(RISC_Instruction*);
 
     bitset<RD_SIZE> getRD() { return m_rd; }
     bitset<RS1_SIZE> getRS1() { return m_rs1; }
@@ -89,6 +96,7 @@ class RISC_IType : public RISC_Instruction{
 public:
     bool Sync();
     bool isReady();
+    bool isDependence(RISC_Instruction*);
 
     bitset<RD_SIZE> getRD() { return m_rd; }
     bitset<RS1_SIZE> getRS1() { return m_rs1; }
@@ -106,6 +114,7 @@ protected:
 class RISC_Abstract_SType : public RISC_Instruction {
 public:
     bool isReady();
+    bool isDependence(RISC_Instruction*);
 
     bitset<RS1_SIZE> getRS1() { return m_rs1; }
     bitset<RS2_SIZE> getRS2() { return m_rs2; }

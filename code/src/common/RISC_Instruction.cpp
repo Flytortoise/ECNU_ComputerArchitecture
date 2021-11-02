@@ -16,6 +16,11 @@ bool RISC_Instruction::isReady() {
     return !m_limit_op.compare(m_operation.to_string());
 }
 
+bool RISC_Instruction::isDependence(RISC_Instruction* in_ins)
+{
+    return false;
+}
+
 bool RISC_Instruction::setInstruction(const bitset<INS_SIZE> &in_data) {
     m_Instruction = bitset<INS_SIZE>(in_data);
     return this->Sync();
@@ -38,6 +43,13 @@ bool RISC_RType::Sync() {
 bool RISC_RType::isReady() {
     return (RISC_Instruction::isReady()) && !m_limit_funt3.compare(m_funt3.to_string()) 
                                          && !m_limit_funt7.compare(m_funt7.to_string());
+}
+
+bool RISC_RType::isDependence(RISC_Instruction* in_ins)
+{
+    bitset<RD_SIZE> in_rd = bitset<RD_SIZE>(GetBitSetValue(in_ins->getINS(), OP_SIZE, RD_SIZE));
+
+    return m_rs1 == in_rd || m_rs2 == in_rd;
 }
 
 bool RISC_IType::Sync() {
@@ -69,8 +81,22 @@ bool RISC_IType::isReady() {
     return (RISC_Instruction::isReady()) && !m_limit_funt3.compare(m_funt3.to_string());
 }
 
+bool RISC_IType::isDependence(RISC_Instruction* in_ins)
+{
+    bitset<RD_SIZE> in_rd = bitset<RD_SIZE>(GetBitSetValue(in_ins->getINS(), OP_SIZE, RD_SIZE));
+
+    return m_rs1 == in_rd;
+}
+
 bool RISC_Abstract_SType::isReady() {
     return (RISC_Instruction::isReady()) && !m_limit_funt3.compare(m_funt3.to_string());
+}
+
+bool RISC_Abstract_SType::isDependence(RISC_Instruction* in_ins)
+{
+    bitset<RD_SIZE> in_rd = bitset<RD_SIZE>(GetBitSetValue(in_ins->getINS(), OP_SIZE, RD_SIZE));
+
+    return m_rs1 == in_rd || m_rs2 == in_rd;
 }
 
 bool RISC_SType::Sync() {

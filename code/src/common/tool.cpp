@@ -51,3 +51,24 @@ string GetBitSetValue(string data, unsigned int begin_index, const unsigned int 
     std::reverse(result.begin(), result.end());
     return result;
 }
+
+bool CheckDependence(std::pair<RISC_Instruction*, RISC_RF_Op*>* it,
+    std::pair<RISC_Instruction*, RISC_RF_Op*>* it_1,
+    std::pair<RISC_Instruction*, RISC_RF_Op*>* it_2) {
+
+    if (it_2 != nullptr) {
+        if (it->first->isDependence(it_2->first)) {
+            it_2->first->setDependence(true);
+            return true;
+        }
+    }
+
+    if (it_1 != nullptr) {
+        if (it->first->isDependence(it_1->first)) {
+            it_1->first->setDependence(true);
+            return true;
+        }
+    }
+
+    return false;
+}
