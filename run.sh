@@ -23,7 +23,7 @@ CleanAndMake() {
 
 run_simulator() {
     cd ${OUT_PATH}
-    ./simulator.bin ${FILE_PATH}
+    ./cachesimulator.bin ${FILE_PATH}
 }
 
 main() {
@@ -42,8 +42,8 @@ main() {
         echo "begin test4"
         FILE_PATH=${WORK_PATH}/test/test4/
     else
-        echo "make simulator"
-        MAKE_TARGET=simulator
+        echo "make cache simulator"
+        MAKE_TARGET=cachesimulator
         CleanAndMake
         exit 0
     fi;
